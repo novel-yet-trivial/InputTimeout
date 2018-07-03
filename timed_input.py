@@ -8,9 +8,37 @@ try:
     input = raw_input # python2
 except NameError:
     pass
-import platform
 
-if platform.system() == "Windows":
+#test for OS
+try:
+    # test for Unix-like
+    import signal
+
+    class TimeOutError(Exception): pass
+
+    def _signal_handler(signum=None, frame=None):
+        raise TimeOutError
+
+    def timed_input(prompt='', timeout=None):
+        """
+        timed_input([prompt], [timeout]) -> string
+
+        Read a string from standard input. The trailing newline is stripped.
+        If the user does not press return in :timeout: seconds, None is returned.
+        """
+        if timeout is None:
+            return input(prompt)
+        try:
+            signal.signal(signal.SIGALRM, _signal_handler)
+            signal.alarm(timeout) # raise an error in timeout seconds
+            data = input(prompt)
+            signal.alarm(0) # cancel alarm
+            return data
+        except TimeOutError:
+            print()
+
+except ImportError:
+    # signal is not available ... must be Windows-like OS
     from msvcrt import kbhit, getwch
     import time
     import sys
@@ -51,31 +79,6 @@ if platform.system() == "Windows":
         print()
         return response
 
-else:
-    import signal
-
-    class TimeOutError(Exception): pass
-
-    def _signal_handler(signum=None, frame=None):
-        raise TimeOutError
-
-    def timed_input(prompt='', timeout=None):
-        """
-        timed_input([prompt], [timeout]) -> string
-
-        Read a string from standard input. The trailing newline is stripped.
-        If the user does not press return in :timeout: seconds, None is returned.
-        """
-        if timeout is None:
-            return input(prompt)
-        try:
-            signal.signal(signal.SIGALRM, _signal_handler)
-            signal.alarm(timeout) # raise an error in timeout seconds
-            data = input(prompt)
-            signal.alarm(0) # cancel alarm
-            return data
-        except TimeOutError:
-            print()
 
 ### Test / Demo code:
 def main():
