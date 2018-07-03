@@ -13,6 +13,7 @@ except NameError:
 try:
     # test for Unix-like
     import signal
+    signal.SIGALARM
 
     class TimeOutError(Exception): pass
 
@@ -37,8 +38,8 @@ try:
         except TimeOutError:
             print()
 
-except ImportError:
-    # signal is not available ... must be Windows-like OS
+except (ImportError, AttributeError):
+    # signal is not available ... hopefully it's a Windows-like OS
     from msvcrt import kbhit, getwch
     import time
     import sys
